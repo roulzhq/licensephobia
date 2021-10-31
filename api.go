@@ -15,6 +15,19 @@ type Api struct {
 	Upgrader websocket.Upgrader
 }
 
+type PackageManger string
+
+const (
+	Npm   PackageManger = "npm"
+	Pip   PackageManger = "pip"
+	Cargo PackageManger = "cargo"
+)
+
+type ScanRequest struct {
+	PackageManager PackageManger `json:"packageManager"`
+	Data           string        `json:"data"`
+}
+
 // Initialize creates the API router and route endpoints
 func (api *Api) Initialize() {
 	api.Router = mux.NewRouter()
@@ -83,8 +96,10 @@ func (api *Api) scan(w http.ResponseWriter, r *http.Request) {
 			}
 			break
 		}
-		log.Println(message)
 
-		conn.WriteMessage(websocket.TextMessage, []byte("Recieved message"))
+		var scanRequest ScanRequest
+		json.Unmarshal(message, &scanRequest)
+
+		HandleScanRequest(scanRequest, conn)
 	}
 }
