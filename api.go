@@ -7,19 +7,31 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 )
 
 type Api struct {
-	Router *mux.Router
+	Router   *mux.Router
+	Upgrader websocket.Upgrader
 }
 
+// Initialize creates the API router and route endpoints
 func (api *Api) Initialize() {
 	api.Router = mux.NewRouter()
+	api.Upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		CheckOrigin: func(r *http.Request) bool {
+			origin := r.Header.Get("Origin")
+			return origin == "http://localhost:3000"
+		},
+	}
 
 	// tom: this line is added after initializeRoutes is created later on
 	api.createRoutes()
 }
 
+// Run serves the API via a webserver
 func (api *Api) Run() {
 	server := &http.Server{
 		Addr: "0.0.0.0:8080",
@@ -35,6 +47,10 @@ func (api *Api) Run() {
 	log.Fatal(server.ListenAndServe())
 }
 
+func (api *Api) createRoutes() {
+	api.Router.HandleFunc("/scan", api.scan)
+}
+
 func (api *Api) respondWithError(w http.ResponseWriter, code int, message string) {
 	api.respondWithJSON(w, code, map[string]string{"error": message})
 }
@@ -47,11 +63,28 @@ func (api *Api) respondWithJSON(w http.ResponseWriter, code int, payload interfa
 	w.Write(response)
 }
 
+// ------------------------------------------
 // Handler functions
-func (api *Api) search(w http.ResponseWriter, r *http.Request) {
-	api.respondWithJSON(w, 200, map[string]bool{"found": true})
-}
+// ------------------------------------------
 
-func (api *Api) createRoutes() {
-	api.Router.HandleFunc("/search", api.search).Methods("POST")
+func (api *Api) scan(w http.ResponseWriter, r *http.Request) {
+	conn, err := api.Upgrader.Upgrade(w, r, nil)
+
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	for {
+		_, message, err := conn.ReadMessage()
+		if err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				log.Printf("error: %v", err)
+			}
+			break
+		}
+		log.Println(message)
+
+		conn.WriteMessage(websocket.TextMessage, []byte("Recieved message"))
+	}
 }

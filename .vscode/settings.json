@@ -1,6 +1,16 @@
 {
-    "editor.formatOnSave": true,
-    "go.lintOnSave": "workspace",
-    "go.buildOnSave": "workspace",
-    "editor.defaultFormatter": "golang.go"
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  "go.lintOnSave": "workspace",
+  "go.buildOnSave": "workspace",
+  "editor.defaultFormatter": "golang.go"
+  // "saveAndRunExt": {
+  //   "commands": [
+  //     {
+  //       "match": "\\.(go$)",
+  //       "isShellCommand": false,
+  //       "cmd": "workbench.action.debug.restart"
+  //     }
+  //   ]
+  // }
 }
