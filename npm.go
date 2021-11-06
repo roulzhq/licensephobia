@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"sync"
 
 	"github.com/gorilla/websocket"
 )
@@ -29,6 +30,8 @@ type PackageJson struct {
 	DevDependencies map[string]string `json:"devDependencies"`
 }
 
+var connectionMutex sync.Mutex
+
 func ScanPackageJson(file []byte, conn *websocket.Conn) {
 	log.Print(file)
 
@@ -47,7 +50,7 @@ func ScanPackageJson(file []byte, conn *websocket.Conn) {
 	}
 }
 
-func constructScanPackageResponse(npmPackage ApiPackageResponse, usedVersion string) ScanResponse {
+func constructPackageResponse(npmPackage ApiPackageResponse, usedVersion string) ScanResponse {
 	return ScanResponse{
 		Id:          npmPackage.Id,
 		Name:        npmPackage.Name,
@@ -62,6 +65,14 @@ func constructScanPackageResponse(npmPackage ApiPackageResponse, usedVersion str
 			LicenseType: npmPackage.License,
 		},
 	}
+}
+
+func sendResponseToSocket(data ScanResponse, conn *websocket.Conn) {
+	// TODO: Check if using a mutex like this actually protects the socket
+	// https://github.com/gorilla/websocket/issues/119
+	connectionMutex.Lock()
+	defer connectionMutex.Unlock()
+	conn.WriteJSON(data)
 }
 
 func sendPackageResponse(name string, version string, conn *websocket.Conn) {
@@ -85,7 +96,7 @@ func sendPackageResponse(name string, version string, conn *websocket.Conn) {
 	var responseJson ApiPackageResponse
 	json.Unmarshal(responseData, &responseJson)
 
-	socketData := constructScanPackageResponse(responseJson, version)
+	socketData := constructPackageResponse(responseJson, version)
 
-	conn.WriteJSON(socketData)
+	sendResponseToSocket(socketData, conn)
 }
