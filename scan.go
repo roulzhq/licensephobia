@@ -7,9 +7,27 @@ import (
 	"strings"
 
 	"github.com/gorilla/websocket"
-
-	"github.com/roulzhq/licensephobia/internal/npm"
 )
+
+type ScanResponse struct {
+	Id          string              `json:"id"`
+	Found       bool                `json:"found"`
+	Name        string              `json:"name"`
+	Description string              `json:"description"`
+	Version     ScanResponseVersion `json:"version"`
+	License     ScanResponseLicense `json:"license"`
+	Url         string              `json:"url"`
+}
+
+type ScanResponseVersion struct {
+	Used   string `json:"used"`
+	Latest string `json:"latest"`
+}
+
+type ScanResponseLicense struct {
+	Found       bool   `json:"found"`
+	LicenseType string `json:"type"`
+}
 
 func HandleScanRequest(scanRequest ScanRequest, conn *websocket.Conn) error {
 	packageManager := scanRequest.PackageManager
@@ -23,7 +41,7 @@ func HandleScanRequest(scanRequest ScanRequest, conn *websocket.Conn) error {
 	switch packageManager {
 	case "npm":
 		if mimeType == "data:application/json;" {
-			npm.ScanPackageJson(file, conn)
+			ScanPackageJson(file, conn)
 		} else {
 			return errors.New("the file you uploaded is not a valid package.json file")
 		}
