@@ -41,13 +41,21 @@ func ScanPackageJson(file []byte, conn *websocket.Conn) {
 
 	log.Println(packageJson)
 
+	var wg sync.WaitGroup
+
 	for name, version := range packageJson.Dependencies {
-		go sendPackageResponse(name, version, conn)
+		wg.Add(1)
+		go sendPackageResponse(name, version, conn, &wg)
 	}
 
 	for name, version := range packageJson.DevDependencies {
-		go sendPackageResponse(name, version, conn)
+		wg.Add(1)
+		go sendPackageResponse(name, version, conn, &wg)
 	}
+
+	wg.Wait()
+	log.Println("Closing connection")
+	conn.Close()
 }
 
 func constructPackageResponse(npmPackage ApiPackageResponse, usedVersion string) ScanResponse {
@@ -75,7 +83,9 @@ func sendResponseToSocket(data ScanResponse, conn *websocket.Conn) {
 	conn.WriteJSON(data)
 }
 
-func sendPackageResponse(name string, version string, conn *websocket.Conn) {
+func sendPackageResponse(name string, version string, conn *websocket.Conn, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	url := url.URL{
 		Scheme: "https",
 		Host:   "registry.npmjs.org",
