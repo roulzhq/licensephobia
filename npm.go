@@ -64,6 +64,7 @@ func constructPackageResponse(npmPackage ApiPackageResponse, usedVersion string)
 		Name:        npmPackage.Name,
 		Found:       true,
 		Description: npmPackage.Description,
+		Url:         npmPackage.Homepage,
 		Version: ScanResponseVersion{
 			Used:   usedVersion,
 			Latest: npmPackage.DistTags["latest"],
