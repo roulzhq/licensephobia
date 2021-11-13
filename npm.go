@@ -25,12 +25,49 @@ type ApiPackageResponse struct {
 	Description string            `json:"description"`
 }
 
+type ApiSearchResponse struct {
+	Name string `json:"name"`
+}
+
 type PackageJson struct {
 	Dependencies    map[string]string `json:"dependencies"`
 	DevDependencies map[string]string `json:"devDependencies"`
 }
 
 var connectionMutex sync.Mutex
+
+func SearchPackage(request string, conn *websocket.Conn) {
+	v := url.Values{}
+
+	v.Set("q", request)
+
+	url := url.URL{
+		Scheme:   "https",
+		Host:     "www.npmjs.com",
+		Path:     "search/suggestions",
+		RawQuery: v.Encode(),
+	}
+
+	response, err := http.Get(url.String())
+
+	if err != nil {
+		log.Print(err.Error())
+	}
+
+	responseData, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var responseJson []ApiSearchResponse
+	json.Unmarshal(responseData, &responseJson)
+
+	if len(responseJson) > 5 {
+		responseJson = responseJson[:5]
+	}
+
+	conn.WriteJSON(responseJson)
+}
 
 func ScanPackageJson(file []byte, conn *websocket.Conn) {
 	log.Print(file)

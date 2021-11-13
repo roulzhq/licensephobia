@@ -28,6 +28,11 @@ type ScanRequest struct {
 	Data           string        `json:"data"`
 }
 
+type SearchRequest struct {
+	PackageManager PackageManger `json:"packageManager"`
+	Data           string        `json:"data"`
+}
+
 // Initialize creates the API router and route endpoints
 func (api *Api) Initialize() {
 	api.Router = mux.NewRouter()
@@ -62,6 +67,7 @@ func (api *Api) Run() {
 
 func (api *Api) createRoutes() {
 	api.Router.HandleFunc("/scan", api.scan)
+	api.Router.HandleFunc("/search", api.search)
 }
 
 func (api *Api) respondWithError(w http.ResponseWriter, code int, message string) {
@@ -101,5 +107,29 @@ func (api *Api) scan(w http.ResponseWriter, r *http.Request) {
 		json.Unmarshal(message, &scanRequest)
 
 		HandleScanRequest(scanRequest, conn)
+	}
+}
+
+func (api *Api) search(w http.ResponseWriter, r *http.Request) {
+	conn, err := api.Upgrader.Upgrade(w, r, nil)
+
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	for {
+		_, message, err := conn.ReadMessage()
+		if err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				log.Printf("error: %v", err)
+			}
+			break
+		}
+
+		var searchRequest SearchRequest
+		json.Unmarshal(message, &searchRequest)
+
+		HandleSearchRequest(searchRequest, conn)
 	}
 }
