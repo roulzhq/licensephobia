@@ -25,10 +25,6 @@ type ApiPackageResponse struct {
 	Description string            `json:"description"`
 }
 
-type ApiSearchResponse struct {
-	Name string `json:"name"`
-}
-
 type PackageJson struct {
 	Dependencies    map[string]string `json:"dependencies"`
 	DevDependencies map[string]string `json:"devDependencies"`
@@ -36,10 +32,10 @@ type PackageJson struct {
 
 var connectionMutex sync.Mutex
 
-func SearchPackage(request string, conn *websocket.Conn) {
+func SearchNpmPackage(name string) []SearchPreviewResponse {
 	v := url.Values{}
 
-	v.Set("q", request)
+	v.Set("q", name)
 
 	url := url.URL{
 		Scheme:   "https",
@@ -59,14 +55,14 @@ func SearchPackage(request string, conn *websocket.Conn) {
 		log.Fatal(err)
 	}
 
-	var responseJson []ApiSearchResponse
+	var responseJson []SearchPreviewResponse
 	json.Unmarshal(responseData, &responseJson)
 
 	if len(responseJson) > 5 {
 		responseJson = responseJson[:5]
 	}
 
-	conn.WriteJSON(responseJson)
+	return responseJson
 }
 
 func ScanPackageJson(file []byte, conn *websocket.Conn) {
@@ -124,6 +120,14 @@ func sendResponseToSocket(data ScanResponse, conn *websocket.Conn) {
 func sendPackageResponse(name string, version string, conn *websocket.Conn, wg *sync.WaitGroup) {
 	defer wg.Done()
 
+	responseJson := GetNpmPackage(name)
+
+	socketData := constructPackageResponse(responseJson, version)
+
+	sendResponseToSocket(socketData, conn)
+}
+
+func GetNpmPackage(name string) ApiPackageResponse {
 	url := url.URL{
 		Scheme: "https",
 		Host:   "registry.npmjs.org",
@@ -144,7 +148,5 @@ func sendPackageResponse(name string, version string, conn *websocket.Conn, wg *
 	var responseJson ApiPackageResponse
 	json.Unmarshal(responseData, &responseJson)
 
-	socketData := constructPackageResponse(responseJson, version)
-
-	sendResponseToSocket(socketData, conn)
+	return responseJson
 }
