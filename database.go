@@ -14,12 +14,13 @@ type Database struct {
 
 func InitDatabase() {
 	host := os.Getenv("SUPABASE_HOST")
-	port := os.Getenv("SUPABASE_PORT")
-	dbName := os.Getenv("SUPABASE_DB")
+	key := os.Getenv("SUPABASE_KEY")
 
-	connUrl := "http://" + host + ":" + port + "/" + dbName
+	url := "https://" + host
 
-	c := postgrest.NewClient(connUrl, "public", map[string]string{})
+	c := postgrest.NewClient(url, "public", map[string]string{})
+
+	c = c.TokenAuth(key)
 
 	res, err := c.From("licenses").Select("license", "", false).Execute()
 
