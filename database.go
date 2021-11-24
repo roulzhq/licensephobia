@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
-	"net/url"
+	"encoding/json"
+	"log"
 	"os"
 
 	"github.com/supabase/postgrest-go"
@@ -12,40 +12,35 @@ type Database struct {
 	Client *postgrest.Client
 }
 
-func InitDatabase() {
+func (app *App) InitDb() {
 	host := os.Getenv("SUPABASE_HOST")
 	key := os.Getenv("SUPABASE_KEY")
 
 	url := "https://" + host
 
-	c := postgrest.NewClient(url, "public", map[string]string{})
+	app.db.Client = postgrest.NewClient(url, "public", map[string]string{})
 
-	c = c.TokenAuth(key)
+	app.db.Client.TokenAuth(key)
 
-	res, err := c.From("licenses").Select("license", "", false).Execute()
-
-	if err != nil {
-		panic(err)
+	if app.db.Client.ClientError != nil {
+		panic(app.db.Client.ClientError)
 	}
-
-	fmt.Println(res)
 }
 
-func (db *Database) Connect() {
-	password := os.Getenv("SUPABASE_PASSWORD")
-	user := os.Getenv("SUPABASE_USER")
-	host := os.Getenv("SUPABASE_HOST")
-	port := os.Getenv("SUPABASE_PORT")
-	dbName := os.Getenv("SUPABASE_DB")
+func (db *Database) GetLicenses() ([]map[string]interface{}, error) {
+	res, err := db.Client.From("licenses").Select("*", "", false).Execute()
 
-	connUrl := "postgresql://" + user + ":" + password + "@" + host + ":" + port + "/" + dbName
-	connUrl = url.QueryEscape(connUrl)
-
-	db.Client = postgrest.NewClient(connUrl, "public", map[string]string{})
-
-	if db.Client.ClientError != nil {
-		panic(db.Client.ClientError)
+	if err != nil {
+		return nil, err
 	}
 
-	fmt.Println(db.Client)
+	var responseMap []map[string]interface{}
+
+	err = json.Unmarshal(res, &responseMap)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return responseMap, nil
 }
