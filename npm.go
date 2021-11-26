@@ -51,7 +51,7 @@ func SearchPackage(request string, conn *websocket.Conn) {
 	response, err := http.Get(url.String())
 
 	if err != nil {
-		log.Print(err.Error())
+		log.Fatal(err.Error())
 	}
 
 	responseData, err := ioutil.ReadAll(response.Body)
@@ -60,7 +60,11 @@ func SearchPackage(request string, conn *websocket.Conn) {
 	}
 
 	var responseJson []ApiSearchResponse
-	json.Unmarshal(responseData, &responseJson)
+	err = json.Unmarshal(responseData, &responseJson)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	if len(responseJson) > 5 {
 		responseJson = responseJson[:5]
