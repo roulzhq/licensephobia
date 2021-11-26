@@ -97,7 +97,9 @@ func (app *App) getLicenses(w http.ResponseWriter, r *http.Request) {
 	licenses, err := app.db.GetLicenses()
 
 	if err != nil {
+		log.Println(err.Error())
 		app.api.respondWithError(w, 500, "Unable to load licenses from database")
+		return
 	}
 
 	app.api.respondWithJSON(w, 200, licenses)

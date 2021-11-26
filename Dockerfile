@@ -27,7 +27,7 @@ WORKDIR /dist
 RUN cp /build/licensephobia .
 
 # Build a small image
-FROM scratch
+FROM alpine
 
 COPY --from=builder /dist/licensephobia /
 
