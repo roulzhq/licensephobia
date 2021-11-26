@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -50,9 +51,13 @@ func (app *App) InitApi() {
 }
 
 // Run serves the API via a webserver
-func (app *App) RunApi() {
+func (app *App) RunApi(port int) {
+	if port == 0 {
+		port = 8080
+	}
+
 	server := &http.Server{
-		Addr: "0.0.0.0:8080",
+		Addr: "0.0.0.0:" + strconv.Itoa(port),
 		// Good practice to set timeouts to avoid Slowloris attacks.
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
