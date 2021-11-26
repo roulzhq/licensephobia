@@ -6,3 +6,5 @@ github.com/joho/godotenv v1.4.0 h1:3l4+N6zfMWnkbPEXKng2o2/MR5mSwTrBih4ZEkkz1lg=
 github.com/joho/godotenv v1.4.0/go.mod h1:f4LDr5Voq0i2e/R5DDNOoa2zzDfwtkZa6DnEwAbqwq4=
 github.com/supabase/postgrest-go v0.0.3 h1:PPRKGQK4rp+WqWt+2NTcV/87jqEL98JtnskfsVJe+lw=
 github.com/supabase/postgrest-go v0.0.3/go.mod h1:F/x4uWdiTG3AQvtl7R2huQHUih+BOaWaFwP58KgR51o=
+github.com/supabase/postgrest-go v0.0.4 h1:Np7/A7Vf0J9/ANiHnpjlxRexIwOIo9oeiOXCTmAe7i0=
+github.com/supabase/postgrest-go v0.0.4/go.mod h1:F/x4uWdiTG3AQvtl7R2huQHUih+BOaWaFwP58KgR51o=
