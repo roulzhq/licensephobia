@@ -1,4 +1,4 @@
-package main
+package database
 
 import (
 	"encoding/json"
@@ -12,18 +12,18 @@ type Database struct {
 	Client *postgrest.Client
 }
 
-func (app *App) InitDb() {
+func (db *Database) Init() {
 	host := os.Getenv("SUPABASE_HOST")
 	key := os.Getenv("SUPABASE_KEY")
 
 	url := "https://" + host
 
-	app.db.Client = postgrest.NewClient(url, "public", map[string]string{})
+	db.Client = postgrest.NewClient(url, "public", map[string]string{})
 
-	app.db.Client.TokenAuth(key)
+	db.Client.TokenAuth(key)
 
-	if app.db.Client.ClientError != nil {
-		panic(app.db.Client.ClientError)
+	if db.Client.ClientError != nil {
+		panic(db.Client.ClientError)
 	}
 }
 
@@ -43,4 +43,14 @@ func (db *Database) GetLicenses() ([]map[string]interface{}, error) {
 	}
 
 	return responseMap, nil
+}
+
+func (db *Database) UpsertLicenses(licenses []LicenseDataItem) ([]byte, error) {
+	res, err := db.Client.From("licenses").Insert(licenses, true, "", "", "").Execute()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
