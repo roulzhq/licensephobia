@@ -25,10 +25,6 @@ type ApiPackageResponse struct {
 	Description string            `json:"description"`
 }
 
-type ApiSearchResponse struct {
-	Name string `json:"name"`
-}
-
 type PackageJson struct {
 	Dependencies    map[string]string `json:"dependencies"`
 	DevDependencies map[string]string `json:"devDependencies"`
@@ -36,10 +32,10 @@ type PackageJson struct {
 
 var connectionMutex sync.Mutex
 
-func SearchPackage(request string, conn *websocket.Conn) {
+func SearchNpmPackage(name string) []SearchPreviewResponse {
 	v := url.Values{}
 
-	v.Set("q", request)
+	v.Set("q", name)
 
 	url := url.URL{
 		Scheme:   "https",
@@ -59,8 +55,8 @@ func SearchPackage(request string, conn *websocket.Conn) {
 		log.Fatal(err)
 	}
 
-	var responseJson []ApiSearchResponse
-	err = json.Unmarshal(responseData, &responseJson)
+	var responseJson []SearchPreviewResponse
+	json.Unmarshal(responseData, &responseJson)
 
 	if err != nil {
 		log.Fatal(err)
@@ -70,17 +66,13 @@ func SearchPackage(request string, conn *websocket.Conn) {
 		responseJson = responseJson[:5]
 	}
 
-	conn.WriteJSON(responseJson)
+	return responseJson
 }
 
 func ScanPackageJson(file []byte, conn *websocket.Conn) {
-	log.Print(file)
-
 	var packageJson PackageJson
 
 	json.Unmarshal(file, &packageJson)
-
-	log.Println(packageJson)
 
 	var wg sync.WaitGroup
 
@@ -95,7 +87,6 @@ func ScanPackageJson(file []byte, conn *websocket.Conn) {
 	}
 
 	wg.Wait()
-	log.Println("Closing connection")
 	conn.Close()
 }
 
@@ -128,6 +119,14 @@ func sendResponseToSocket(data ScanResponse, conn *websocket.Conn) {
 func sendPackageResponse(name string, version string, conn *websocket.Conn, wg *sync.WaitGroup) {
 	defer wg.Done()
 
+	responseJson := GetNpmPackage(name)
+
+	socketData := constructPackageResponse(responseJson, version)
+
+	sendResponseToSocket(socketData, conn)
+}
+
+func GetNpmPackage(name string) ApiPackageResponse {
 	url := url.URL{
 		Scheme: "https",
 		Host:   "registry.npmjs.org",
@@ -148,7 +147,5 @@ func sendPackageResponse(name string, version string, conn *websocket.Conn, wg *
 	var responseJson ApiPackageResponse
 	json.Unmarshal(responseData, &responseJson)
 
-	socketData := constructPackageResponse(responseJson, version)
-
-	sendResponseToSocket(socketData, conn)
+	return responseJson
 }
