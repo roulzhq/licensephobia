@@ -9,24 +9,35 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type ScanResponse struct {
-	Id          string              `json:"id"`
-	Found       bool                `json:"found"`
-	Name        string              `json:"name"`
-	Description string              `json:"description"`
-	Version     ScanResponseVersion `json:"version"`
-	License     ScanResponseLicense `json:"license"`
-	Url         string              `json:"url"`
+type ScanMessageType string
+
+const (
+	PackageMessage ScanMessageType = "package"
+	SummaryMessage ScanMessageType = "summary"
+)
+
+type PackageScanMessage struct {
+	Type ScanMessageType `json:"type"`
+	Data ScanResponse    `json:"data"`
 }
+
+type SummaryScanMessage struct {
+	Type ScanMessageType `json:"type"`
+	Data Summary         `json:"data"`
+}
+
+type ScanResponse struct {
+	Found   bool    `json:"found"`
+	Name    string  `json:"name"`
+	Version string  `json:"version"`
+	Package Package `json:"package"`
+}
+
+type SummaryResponse = Summary
 
 type ScanResponseVersion struct {
 	Used   string `json:"used"`
 	Latest string `json:"latest"`
-}
-
-type ScanResponseLicense struct {
-	Found       bool   `json:"found"`
-	LicenseType string `json:"type"`
 }
 
 func HandleScanRequest(scanRequest ScanRequest, conn *websocket.Conn) error {
@@ -64,4 +75,32 @@ func decodeFileString(file string) (mimeType string, data []byte, err error) {
 	data = dec
 
 	return mimeType, data, err
+}
+
+// Logic to send package data via websockets
+
+func ConstructScanPackageResponse(pkg Package, usedName string, usedVersion string, found bool) PackageScanMessage {
+	scanResponse := ScanResponse{
+		Name:    usedName,
+		Version: usedVersion,
+		Found:   found,
+		Package: pkg,
+	}
+
+	return PackageScanMessage{
+		Type: PackageMessage,
+		Data: scanResponse,
+	}
+}
+
+func SendScanPackageResponse(response PackageScanMessage, conn *websocket.Conn) {
+	connectionMutex.Lock()
+	defer connectionMutex.Unlock()
+	conn.WriteJSON(response)
+}
+
+func SendScanSummaryResponse(response SummaryScanMessage, conn *websocket.Conn) {
+	connectionMutex.Lock()
+	defer connectionMutex.Unlock()
+	conn.WriteJSON(response)
 }

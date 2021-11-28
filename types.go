@@ -7,3 +7,29 @@ type License struct {
 }
 
 type LicenseCondition map[string][]bool
+
+type LicenseInfo struct {
+	Found   bool   `json:"found"`
+	Known   bool   `json:"known"`
+	License string `json:"type"`
+}
+
+type Package struct {
+	Id            string      `json:"id"`
+	Name          string      `json:"name"`
+	Description   string      `json:"description"`
+	LatestVersion string      `json:"latestVersion"`
+	License       LicenseInfo `json:"license"`
+	Author        string      `json:"author"`
+	Homepage      string      `json:"homepage"`
+}
+
+type Summary struct {
+	Conditions SummaryConditions `json:"conditions"`
+}
+
+type SummaryConditions struct {
+	Conditions  []string `json:"conditions"`
+	Permissions []string `json:"permissions"`
+	Limitations []string `json:"limitations"`
+}

@@ -41,9 +41,9 @@ type SearchRequest struct {
 }
 
 // Initialize creates the API router and route endpoints
-func (app *App) InitApi() {
-	app.api.Router = mux.NewRouter()
-	app.api.Upgrader = websocket.Upgrader{
+func (api *Api) Init() {
+	api.Router = mux.NewRouter()
+	api.Upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 		CheckOrigin: func(r *http.Request) bool {
@@ -53,16 +53,16 @@ func (app *App) InitApi() {
 	}
 
 	// tom: this line is added after initializeRoutes is created later on
-	app.createRoutes()
+	api.createRoutes()
 }
 
 // Run serves the API via a webserver
-func (app *App) RunApi(port int) {
+func (api *Api) Run(port int) {
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},
 		AllowCredentials: true,
 	})
-	handler := c.Handler(app.api.Router)
+	handler := c.Handler(api.Router)
 	server := &http.Server{
 		Addr: "0.0.0.0:" + strconv.Itoa(port),
 		// Good practice to set timeouts to avoid Slowloris attacks.
@@ -77,11 +77,11 @@ func (app *App) RunApi(port int) {
 	log.Fatal(server.ListenAndServe())
 }
 
-func (app *App) createRoutes() {
-	app.api.Router.HandleFunc("/scan", app.scan)
-	app.api.Router.HandleFunc("/searchPreview", app.searchPreview)
-	app.api.Router.HandleFunc("/search", app.search)
-	app.api.Router.HandleFunc("/licenses", app.getLicenses)
+func (api *Api) createRoutes() {
+	api.Router.HandleFunc("/scan", api.scan)
+	api.Router.HandleFunc("/searchPreview", api.searchPreview)
+	api.Router.HandleFunc("/search", api.search)
+	api.Router.HandleFunc("/licenses", api.getLicenses)
 }
 
 func (api *Api) respondWithError(w http.ResponseWriter, code int, message string) {
@@ -100,20 +100,32 @@ func (api *Api) respondWithJSON(w http.ResponseWriter, code int, payload interfa
 // Handler functions
 // ------------------------------------------
 
-func (app *App) getLicenses(w http.ResponseWriter, r *http.Request) {
-	licenses, err := app.db.GetLicenses()
+func (api *Api) getLicenses(w http.ResponseWriter, r *http.Request) {
+	licenses, err := DB.GetLicenses()
 
 	if err != nil {
 		log.Println(err.Error())
-		app.api.respondWithError(w, 500, "Unable to load licenses from database")
+		api.respondWithError(w, 500, "Unable to load licenses from database")
 		return
 	}
 
-	app.api.respondWithJSON(w, 200, licenses)
+	api.respondWithJSON(w, 200, licenses)
 }
 
-func (app *App) scan(w http.ResponseWriter, r *http.Request) {
-	conn, err := app.api.Upgrader.Upgrade(w, r, nil)
+func (api *Api) getLicenseConditions(w http.ResponseWriter, r *http.Request) {
+	licenses, err := DB.GetLicenseConditions()
+
+	if err != nil {
+		log.Println(err.Error())
+		api.respondWithError(w, 500, "Unable to load licenses from database")
+		return
+	}
+
+	api.respondWithJSON(w, 200, licenses)
+}
+
+func (api *Api) scan(w http.ResponseWriter, r *http.Request) {
+	conn, err := api.Upgrader.Upgrade(w, r, nil)
 
 	if err != nil {
 		log.Println(err)
@@ -136,8 +148,8 @@ func (app *App) scan(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *App) searchPreview(w http.ResponseWriter, r *http.Request) {
-	conn, err := app.api.Upgrader.Upgrade(w, r, nil)
+func (api *Api) searchPreview(w http.ResponseWriter, r *http.Request) {
+	conn, err := api.Upgrader.Upgrade(w, r, nil)
 
 	if err != nil {
 		log.Println(err)
@@ -160,7 +172,7 @@ func (app *App) searchPreview(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *App) search(w http.ResponseWriter, r *http.Request) {
+func (api *Api) search(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 
 	packageManager := params.Get("packageManager")
@@ -171,8 +183,8 @@ func (app *App) search(w http.ResponseWriter, r *http.Request) {
 	response, err := HandleSearchRequest(request)
 
 	if err != nil {
-		app.api.respondWithError(w, 404, "Could not find the package you where looking for.")
+		api.respondWithError(w, 404, "Could not find the package you where looking for.")
 	} else {
-		app.api.respondWithJSON(w, 200, response)
+		api.respondWithJSON(w, 200, response)
 	}
 }

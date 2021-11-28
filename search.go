@@ -7,13 +7,8 @@ import (
 )
 
 type SearchResponse struct {
-	Id          string              `json:"id"`
-	Found       bool                `json:"found"`
-	Name        string              `json:"name"`
-	Description string              `json:"description"`
-	Version     string              `json:"version"`
-	License     ScanResponseLicense `json:"license"`
-	Url         string              `json:"url"`
+	Found   bool    `json:"found"`
+	Package Package `json:"package"`
 }
 
 type SearchPreviewResponse struct {
@@ -47,8 +42,13 @@ func HandleSearchRequest(search SearchRequest) (SearchResponse, error) {
 
 	switch packageManager {
 	case "npm":
-		npmPackage := GetNpmPackage(search.Name)
-		response = apiToSearchResponse(npmPackage)
+		pkg, err := GetNpmPackage(search.Name)
+
+		if err != nil {
+			response = apiToSearchResponse(pkg, false)
+		} else {
+			response = apiToSearchResponse(pkg, true)
+		}
 	case "pip":
 		break
 	case "cargo":
@@ -62,17 +62,9 @@ func HandleSearchRequest(search SearchRequest) (SearchResponse, error) {
 	}
 }
 
-func apiToSearchResponse(npmPackage ApiPackageResponse) SearchResponse {
+func apiToSearchResponse(pkg Package, found bool) SearchResponse {
 	return SearchResponse{
-		Id:          npmPackage.Id,
-		Name:        npmPackage.Name,
-		Found:       true,
-		Description: npmPackage.Description,
-		Url:         npmPackage.Homepage,
-		Version:     npmPackage.DistTags["latest"],
-		License: ScanResponseLicense{
-			Found:       npmPackage.License != "",
-			LicenseType: npmPackage.License,
-		},
+		Found:   found,
+		Package: pkg,
 	}
 }
