@@ -14,6 +14,14 @@ type LicenseInfo struct {
 	License string `json:"type"`
 }
 
+type PackageManger string
+
+const (
+	Npm   PackageManger = "npm"
+	Pip   PackageManger = "pip"
+	Cargo PackageManger = "cargo"
+)
+
 type Package struct {
 	Id            string      `json:"id"`
 	Name          string      `json:"name"`

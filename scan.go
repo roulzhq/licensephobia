@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"strings"
+	"sync"
 
 	"github.com/gorilla/websocket"
 )
@@ -41,6 +42,12 @@ type ScanResponseVersion struct {
 }
 
 func HandleScanRequest(scanRequest ScanRequest, conn *websocket.Conn) error {
+	var wg sync.WaitGroup
+	var packageList map[string]string
+
+	defer wg.Done()
+	defer conn.Close()
+
 	packageManager := scanRequest.PackageManager
 	mimeType, file, err := decodeFileString(scanRequest.Data)
 
@@ -52,7 +59,7 @@ func HandleScanRequest(scanRequest ScanRequest, conn *websocket.Conn) error {
 	switch packageManager {
 	case "npm":
 		if mimeType == "data:application/json;" {
-			ScanPackageJson(file, conn)
+			packageList = ScanPackageJson(file)
 		} else {
 			return errors.New("the file you uploaded is not a valid package.json file")
 		}
@@ -61,6 +68,39 @@ func HandleScanRequest(scanRequest ScanRequest, conn *websocket.Conn) error {
 	case "cargo":
 		break
 	}
+
+	// Keep track of the packages loaded to later make the summary
+	packages := make(map[string]*Package, len(packageList))
+
+	// We use a counter here to keep track of the current index.
+	// It is then used to assign a loaded package to the packages slice from above
+	for name, version := range packageList {
+		wg.Add(1)
+
+		// load every package, put it into the package list and send the response via websocket
+		go func(name string, version string, packageManager PackageManger, conn *websocket.Conn, wg *sync.WaitGroup, packages map[string]*Package) {
+			defer wg.Done()
+
+			pkg, err := loadPackage(packageManager, name)
+
+			var response PackageScanMessage
+
+			if err != nil {
+				response = constructScanPackageResponse(pkg, name, version, false)
+			} else {
+				response = constructScanPackageResponse(pkg, name, version, true)
+
+				packages[name] = &pkg
+			}
+
+			sendScanPackageResponse(response, conn)
+		}(name, version, packageManager, conn, &wg, packages)
+	}
+
+	wg.Wait()
+
+	// When all packages are loaded, construct the summary
+	constructSummary(packages)
 
 	return nil
 }
@@ -79,7 +119,7 @@ func decodeFileString(file string) (mimeType string, data []byte, err error) {
 
 // Logic to send package data via websockets
 
-func ConstructScanPackageResponse(pkg Package, usedName string, usedVersion string, found bool) PackageScanMessage {
+func constructScanPackageResponse(pkg Package, usedName string, usedVersion string, found bool) PackageScanMessage {
 	scanResponse := ScanResponse{
 		Name:    usedName,
 		Version: usedVersion,
@@ -93,14 +133,33 @@ func ConstructScanPackageResponse(pkg Package, usedName string, usedVersion stri
 	}
 }
 
-func SendScanPackageResponse(response PackageScanMessage, conn *websocket.Conn) {
+func sendScanPackageResponse(response PackageScanMessage, conn *websocket.Conn) {
 	connectionMutex.Lock()
 	defer connectionMutex.Unlock()
 	conn.WriteJSON(response)
 }
 
-func SendScanSummaryResponse(response SummaryScanMessage, conn *websocket.Conn) {
+func sendScanSummaryResponse(response SummaryScanMessage, conn *websocket.Conn) {
 	connectionMutex.Lock()
 	defer connectionMutex.Unlock()
 	conn.WriteJSON(response)
+}
+
+func constructSummary(packages map[string]*Package) {
+	log.Print(packages)
+}
+
+func loadPackage(packageManager PackageManger, name string) (Package, error) {
+	switch packageManager {
+	case "npm":
+		return GetNpmPackage(name)
+	case "pip":
+		break
+	case "cargo":
+		break
+	default:
+		return Package{}, errors.New("the given packageManager is not supported")
+	}
+
+	return Package{}, errors.New("unknown error while getting the package")
 }

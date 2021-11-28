@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"sync"
-
-	"github.com/gorilla/websocket"
 )
 
 type Author struct {
@@ -70,25 +68,12 @@ func SearchNpmPackage(name string) []SearchPreviewResponse {
 	return responseJson
 }
 
-func ScanPackageJson(file []byte, conn *websocket.Conn) {
+func ScanPackageJson(file []byte) map[string]string {
 	var packageJson PackageJson
 
 	json.Unmarshal(file, &packageJson)
 
-	var wg sync.WaitGroup
-
-	for name, version := range packageJson.Dependencies {
-		wg.Add(1)
-		go sendPackageResponse(name, version, conn, &wg)
-	}
-
-	for name, version := range packageJson.DevDependencies {
-		wg.Add(1)
-		go sendPackageResponse(name, version, conn, &wg)
-	}
-
-	wg.Wait()
-	conn.Close()
+	return packageJson.Dependencies
 }
 
 func GetNpmPackage(name string) (Package, error) {
@@ -133,20 +118,4 @@ func NpmPackageToGeneric(npmPackage ApiPackageResponse) Package {
 			License: npmPackage.License,
 		},
 	}
-}
-
-func sendPackageResponse(name string, version string, conn *websocket.Conn, wg *sync.WaitGroup) {
-	defer wg.Done()
-
-	responseJson, err := GetNpmPackage(name)
-
-	var socketData PackageScanMessage
-
-	if err != nil {
-		socketData = ConstructScanPackageResponse(responseJson, name, version, false)
-	} else {
-		socketData = ConstructScanPackageResponse(responseJson, name, version, true)
-	}
-
-	SendScanPackageResponse(socketData, conn)
 }

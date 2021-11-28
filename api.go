@@ -17,14 +17,6 @@ type Api struct {
 	Upgrader websocket.Upgrader
 }
 
-type PackageManger string
-
-const (
-	Npm   PackageManger = "npm"
-	Pip   PackageManger = "pip"
-	Cargo PackageManger = "cargo"
-)
-
 type ScanRequest struct {
 	PackageManager PackageManger `json:"packageManager"`
 	Data           string        `json:"data"`
