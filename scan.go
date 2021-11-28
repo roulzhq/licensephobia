@@ -100,7 +100,8 @@ func HandleScanRequest(scanRequest ScanRequest, conn *websocket.Conn) error {
 	wg.Wait()
 
 	// When all packages are loaded, construct the summary
-	constructSummary(packages)
+	summary := constructSummary(packages)
+	sendScanSummaryResponse(summary, conn)
 
 	return nil
 }
@@ -145,8 +146,19 @@ func sendScanSummaryResponse(response SummaryScanMessage, conn *websocket.Conn) 
 	conn.WriteJSON(response)
 }
 
-func constructSummary(packages map[string]*Package) {
-	log.Print(packages)
+func constructSummary(packages map[string]*Package) SummaryScanMessage {
+	response := SummaryScanMessage{
+		Type: SummaryMessage,
+		Data: Summary{
+			Conditions: SummaryConditions{
+				Permissions: []string{"Commercial Use", "Distribution", "Modification", "Patent use", "Private use"},
+				Conditions:  []string{"Disclose source", "License notice", "Copyright notice", "Network use is distribution", "Same license", "State changes"},
+				Limitations: []string{"Liability", "Warranty"},
+			},
+		},
+	}
+
+	return response
 }
 
 func loadPackage(packageManager PackageManger, name string) (Package, error) {
