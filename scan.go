@@ -71,6 +71,7 @@ func HandleScanRequest(scanRequest ScanRequest, conn *websocket.Conn) error {
 
 	// Keep track of the packages loaded to later make the summary
 	packages := make(map[string]*Package, len(packageList))
+	var packagesMutex = sync.RWMutex{}
 
 	// We use a counter here to keep track of the current index.
 	// It is then used to assign a loaded package to the packages slice from above
@@ -90,7 +91,9 @@ func HandleScanRequest(scanRequest ScanRequest, conn *websocket.Conn) error {
 			} else {
 				response = constructScanPackageResponse(pkg, name, version, true)
 
+				packagesMutex.RLock()
 				packages[name] = &pkg
+				packagesMutex.RUnlock()
 			}
 
 			sendScanPackageResponse(response, conn)
