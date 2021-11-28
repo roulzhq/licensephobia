@@ -54,21 +54,6 @@ func HandleScanRequest(scanRequest ScanRequest, conn *websocket.Conn) error {
 	return nil
 }
 
-func HandleSearchRequest(searchRequest SearchRequest, conn *websocket.Conn) error {
-	packageManager := searchRequest.PackageManager
-
-	switch packageManager {
-	case "npm":
-		SearchPackage(searchRequest.Data, conn)
-	case "pip":
-		break
-	case "cargo":
-		break
-	}
-
-	return nil
-}
-
 func decodeFileString(file string) (mimeType string, data []byte, err error) {
 	splitString := strings.Split(string(file), "base64,")
 	mimeType = splitString[0]

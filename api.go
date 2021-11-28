@@ -9,6 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
+	"github.com/rs/cors"
 )
 
 type Api struct {
@@ -29,9 +30,14 @@ type ScanRequest struct {
 	Data           string        `json:"data"`
 }
 
+type SearchPreviewRequest struct {
+	PackageManager PackageManger `json:"packageManager"`
+	Name           string        `json:"name"`
+}
+
 type SearchRequest struct {
 	PackageManager PackageManger `json:"packageManager"`
-	Data           string        `json:"data"`
+	Name           string        `json:"name"`
 }
 
 // Initialize creates the API router and route endpoints
@@ -52,17 +58,18 @@ func (app *App) InitApi() {
 
 // Run serves the API via a webserver
 func (app *App) RunApi(port int) {
-	if port == 0 {
-		port = 8080
-	}
-
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowCredentials: true,
+	})
+	handler := c.Handler(app.api.Router)
 	server := &http.Server{
 		Addr: "0.0.0.0:" + strconv.Itoa(port),
 		// Good practice to set timeouts to avoid Slowloris attacks.
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
-		Handler:      app.api.Router,
+		Handler:      handler,
 	}
 
 	log.Println("Running server at ", server.Addr)
@@ -72,8 +79,8 @@ func (app *App) RunApi(port int) {
 
 func (app *App) createRoutes() {
 	app.api.Router.HandleFunc("/scan", app.scan)
+	app.api.Router.HandleFunc("/searchPreview", app.searchPreview)
 	app.api.Router.HandleFunc("/search", app.search)
-
 	app.api.Router.HandleFunc("/licenses", app.getLicenses)
 }
 
@@ -129,7 +136,7 @@ func (app *App) scan(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *App) search(w http.ResponseWriter, r *http.Request) {
+func (app *App) searchPreview(w http.ResponseWriter, r *http.Request) {
 	conn, err := app.api.Upgrader.Upgrade(w, r, nil)
 
 	if err != nil {
@@ -146,9 +153,26 @@ func (app *App) search(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		var searchRequest SearchRequest
+		var searchRequest SearchPreviewRequest
 		json.Unmarshal(message, &searchRequest)
 
-		HandleSearchRequest(searchRequest, conn)
+		HandleSearchPreviewRequest(searchRequest, conn)
+	}
+}
+
+func (app *App) search(w http.ResponseWriter, r *http.Request) {
+	params := r.URL.Query()
+
+	packageManager := params.Get("packageManager")
+	name := params.Get("name")
+
+	request := SearchRequest{PackageManger(packageManager), name}
+
+	response, err := HandleSearchRequest(request)
+
+	if err != nil {
+		app.api.respondWithError(w, 404, "Could not find the package you where looking for.")
+	} else {
+		app.api.respondWithJSON(w, 200, response)
 	}
 }
