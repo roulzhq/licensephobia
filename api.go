@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/go-chi/cors"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
-	"github.com/rs/cors"
 )
 
 type Api struct {
@@ -62,6 +62,7 @@ func (api *Api) Run(port int) {
 		AllowedOrigins:   []string{"http://localhost:3000"},
 		AllowCredentials: true,
 	})
+
 	handler := c.Handler(api.Router)
 	server := &http.Server{
 		Addr: "0.0.0.0:" + strconv.Itoa(port),
