@@ -47,7 +47,7 @@ func SearchNpmPackage(name string) []SearchPreviewResponse {
 	response, err := http.Get(url.String())
 
 	if err != nil {
-		log.Print(err.Error())
+		log.Fatal(err.Error())
 	}
 
 	responseData, err := ioutil.ReadAll(response.Body)
@@ -58,6 +58,10 @@ func SearchNpmPackage(name string) []SearchPreviewResponse {
 	var responseJson []SearchPreviewResponse
 	json.Unmarshal(responseData, &responseJson)
 
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	if len(responseJson) > 5 {
 		responseJson = responseJson[:5]
 	}
@@ -66,13 +70,9 @@ func SearchNpmPackage(name string) []SearchPreviewResponse {
 }
 
 func ScanPackageJson(file []byte, conn *websocket.Conn) {
-	log.Print(file)
-
 	var packageJson PackageJson
 
 	json.Unmarshal(file, &packageJson)
-
-	log.Println(packageJson)
 
 	var wg sync.WaitGroup
 
@@ -87,7 +87,6 @@ func ScanPackageJson(file []byte, conn *websocket.Conn) {
 	}
 
 	wg.Wait()
-	log.Println("Closing connection")
 	conn.Close()
 }
 

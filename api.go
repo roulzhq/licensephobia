@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -40,9 +41,9 @@ type SearchRequest struct {
 }
 
 // Initialize creates the API router and route endpoints
-func (api *Api) Initialize() {
-	api.Router = mux.NewRouter()
-	api.Upgrader = websocket.Upgrader{
+func (app *App) InitApi() {
+	app.api.Router = mux.NewRouter()
+	app.api.Upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 		CheckOrigin: func(r *http.Request) bool {
@@ -52,20 +53,18 @@ func (api *Api) Initialize() {
 	}
 
 	// tom: this line is added after initializeRoutes is created later on
-	api.createRoutes()
+	app.createRoutes()
 }
 
 // Run serves the API via a webserver
-func (api *Api) Run() {
+func (app *App) RunApi(port int) {
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},
 		AllowCredentials: true,
 	})
-
-	handler := c.Handler(api.Router)
-
+	handler := c.Handler(app.api.Router)
 	server := &http.Server{
-		Addr: "0.0.0.0:8080",
+		Addr: "0.0.0.0:" + strconv.Itoa(port),
 		// Good practice to set timeouts to avoid Slowloris attacks.
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
@@ -78,10 +77,11 @@ func (api *Api) Run() {
 	log.Fatal(server.ListenAndServe())
 }
 
-func (api *Api) createRoutes() {
-	api.Router.HandleFunc("/scan", api.scan)
-	api.Router.HandleFunc("/searchPreview", api.searchPreview)
-	api.Router.HandleFunc("/search", api.search)
+func (app *App) createRoutes() {
+	app.api.Router.HandleFunc("/scan", app.scan)
+	app.api.Router.HandleFunc("/searchPreview", app.searchPreview)
+	app.api.Router.HandleFunc("/search", app.search)
+	app.api.Router.HandleFunc("/licenses", app.getLicenses)
 }
 
 func (api *Api) respondWithError(w http.ResponseWriter, code int, message string) {
@@ -100,9 +100,20 @@ func (api *Api) respondWithJSON(w http.ResponseWriter, code int, payload interfa
 // Handler functions
 // ------------------------------------------
 
-// scan takes a package file (package.json for example) and returns a list of PackageResults per websocket
-func (api *Api) scan(w http.ResponseWriter, r *http.Request) {
-	conn, err := api.Upgrader.Upgrade(w, r, nil)
+func (app *App) getLicenses(w http.ResponseWriter, r *http.Request) {
+	licenses, err := app.db.GetLicenses()
+
+	if err != nil {
+		log.Println(err.Error())
+		app.api.respondWithError(w, 500, "Unable to load licenses from database")
+		return
+	}
+
+	app.api.respondWithJSON(w, 200, licenses)
+}
+
+func (app *App) scan(w http.ResponseWriter, r *http.Request) {
+	conn, err := app.api.Upgrader.Upgrade(w, r, nil)
 
 	if err != nil {
 		log.Println(err)
@@ -125,9 +136,8 @@ func (api *Api) scan(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// searchPreview is a websocket endpoint to get suggestions for packages, based on a given input string.
-func (api *Api) searchPreview(w http.ResponseWriter, r *http.Request) {
-	conn, err := api.Upgrader.Upgrade(w, r, nil)
+func (app *App) searchPreview(w http.ResponseWriter, r *http.Request) {
+	conn, err := app.api.Upgrader.Upgrade(w, r, nil)
 
 	if err != nil {
 		log.Println(err)
@@ -150,9 +160,8 @@ func (api *Api) searchPreview(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (api *Api) search(w http.ResponseWriter, r *http.Request) {
+func (app *App) search(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
-	log.Print(params)
 
 	packageManager := params.Get("packageManager")
 	name := params.Get("name")
@@ -162,8 +171,8 @@ func (api *Api) search(w http.ResponseWriter, r *http.Request) {
 	response, err := HandleSearchRequest(request)
 
 	if err != nil {
-		api.respondWithError(w, 404, "Could not find the package you where looking for.")
+		app.api.respondWithError(w, 404, "Could not find the package you where looking for.")
 	} else {
-		api.respondWithJSON(w, 200, response)
+		app.api.respondWithJSON(w, 200, response)
 	}
 }
