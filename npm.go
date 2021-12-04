@@ -2,13 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"sync"
-
-	"github.com/gorilla/websocket"
 )
 
 type Author struct {
@@ -69,64 +68,15 @@ func SearchNpmPackage(name string) []SearchPreviewResponse {
 	return responseJson
 }
 
-func ScanPackageJson(file []byte, conn *websocket.Conn) {
+func ScanPackageJson(file []byte) map[string]string {
 	var packageJson PackageJson
 
 	json.Unmarshal(file, &packageJson)
 
-	var wg sync.WaitGroup
-
-	for name, version := range packageJson.Dependencies {
-		wg.Add(1)
-		go sendPackageResponse(name, version, conn, &wg)
-	}
-
-	for name, version := range packageJson.DevDependencies {
-		wg.Add(1)
-		go sendPackageResponse(name, version, conn, &wg)
-	}
-
-	wg.Wait()
-	conn.Close()
+	return packageJson.Dependencies
 }
 
-func constructPackageResponse(npmPackage ApiPackageResponse, usedVersion string) ScanResponse {
-	return ScanResponse{
-		Id:          npmPackage.Id,
-		Name:        npmPackage.Name,
-		Found:       true,
-		Description: npmPackage.Description,
-		Url:         npmPackage.Homepage,
-		Version: ScanResponseVersion{
-			Used:   usedVersion,
-			Latest: npmPackage.DistTags["latest"],
-		},
-		License: ScanResponseLicense{
-			Found:       npmPackage.License != "",
-			LicenseType: npmPackage.License,
-		},
-	}
-}
-
-func sendResponseToSocket(data ScanResponse, conn *websocket.Conn) {
-	// TODO: Check if using a mutex like this actually protects the socket
-	// https://github.com/gorilla/websocket/issues/119
-	connectionMutex.Lock()
-	defer connectionMutex.Unlock()
-	conn.WriteJSON(data)
-}
-
-func sendPackageResponse(name string, version string, conn *websocket.Conn, wg *sync.WaitGroup) {
-	defer wg.Done()
-
-	responseJson := GetNpmPackage(name)
-
-	socketData := constructPackageResponse(responseJson, version)
-
-	sendResponseToSocket(socketData, conn)
-}
-
-func GetNpmPackage(name string) ApiPackageResponse {
+func GetNpmPackage(name string) (Package, error) {
 	url := url.URL{
 		Scheme: "https",
 		Host:   "registry.npmjs.org",
@@ -135,17 +85,37 @@ func GetNpmPackage(name string) ApiPackageResponse {
 
 	response, err := http.Get(url.String())
 
-	if err != nil {
-		log.Print(err.Error())
+	if response.StatusCode != http.StatusOK || err != nil {
+		return Package{}, errors.New("Could not find NPM package")
 	}
 
 	responseData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err.Error())
+		return Package{}, err
 	}
 
 	var responseJson ApiPackageResponse
 	json.Unmarshal(responseData, &responseJson)
 
-	return responseJson
+	pkg := NpmPackageToGeneric(responseJson)
+
+	return pkg, nil
+}
+
+func NpmPackageToGeneric(npmPackage ApiPackageResponse) Package {
+	known := LicenseExists(npmPackage.License)
+
+	return Package{
+		Id:            npmPackage.Id,
+		Name:          npmPackage.Name,
+		Description:   npmPackage.Description,
+		Homepage:      npmPackage.Homepage,
+		LatestVersion: npmPackage.DistTags["latest"],
+		License: LicenseInfo{
+			Found:   npmPackage.License != "",
+			Known:   known,
+			License: npmPackage.License,
+		},
+	}
 }
