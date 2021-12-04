@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
+	"github.com/roulzhq/licensephobia/database"
 )
 
 type Api struct {
@@ -71,10 +72,13 @@ func (api *Api) Run(port int) {
 }
 
 func (api *Api) createRoutes() {
-	api.Router.HandleFunc("/scan", api.scan)
-	api.Router.HandleFunc("/searchPreview", api.searchPreview)
-	api.Router.HandleFunc("/search", api.search)
-	api.Router.HandleFunc("/licenses", api.getLicenses)
+	api.Router.Path("/scan").HandlerFunc(api.scan)
+	api.Router.Path("/searchPreview").HandlerFunc(api.searchPreview)
+	api.Router.Path("/search").Queries("packageManager", "{packageManager}", "name", "{name}").HandlerFunc(api.search)
+
+	api.Router.Path("/licenses").HandlerFunc(api.getLicenses)
+	api.Router.Path("/licenses/conditions").Queries("id", "{id}").HandlerFunc(api.getLicenseConditions)
+	api.Router.Path("/licenses/conditions").HandlerFunc(api.getLicenseConditions)
 }
 
 func (api *Api) respondWithError(w http.ResponseWriter, code int, message string) {
@@ -106,7 +110,18 @@ func (api *Api) getLicenses(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *Api) getLicenseConditions(w http.ResponseWriter, r *http.Request) {
-	licenses, err := DB.GetLicenseConditions()
+	params := r.URL.Query()
+
+	ids := params["id"]
+
+	var licenses []database.LicenseConditions
+	var err error
+
+	if len(ids) > 0 {
+		licenses, err = DB.GetLicenseConditionsByIds(ids)
+	} else {
+		licenses, err = DB.GetLicenseConditions()
+	}
 
 	if err != nil {
 		log.Println(err.Error())
