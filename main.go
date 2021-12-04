@@ -7,10 +7,7 @@ import (
 	db "github.com/roulzhq/licensephobia/database"
 )
 
-type App struct {
-	api Api
-	db  db.Database
-}
+var DB db.Database = db.Database{}
 
 func main() {
 	godotenv.Load()
@@ -28,14 +25,11 @@ func main() {
 }
 
 func runApp(port int) {
-	db := db.Database{}
 	api := Api{}
 
-	app := App{api, db}
-
-	app.db.Init()
-	app.InitApi()
-	app.RunApi(port)
+	DB.Init()
+	api.Init()
+	api.Run(port)
 }
 
 func runDataImporter() {
