@@ -63,7 +63,13 @@ func (app *App) InitApi() {
 // Run serves the API via a webserver
 func (app *App) RunApi(port int) {
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedOrigins: []string{
+			"http://localhost:3000",
+			"https://api.licensephobia.com",
+			"http://api.licensephobia.com",
+			"https://dev.api.licensephobia.com",
+			"http://dev.api.licensephobia.com",
+		},
 		AllowCredentials: true,
 	})
 	handler := c.Handler(app.api.Router)
