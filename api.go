@@ -17,6 +17,10 @@ type Api struct {
 	Upgrader websocket.Upgrader
 }
 
+type Ping struct {
+	Ping string `json:"ping"`
+}
+
 type PackageManger string
 
 const (
@@ -78,6 +82,8 @@ func (app *App) RunApi(port int) {
 }
 
 func (app *App) createRoutes() {
+	app.api.Router.HandleFunc("/ping", app.ping)
+
 	app.api.Router.HandleFunc("/scan", app.scan)
 	app.api.Router.HandleFunc("/searchPreview", app.searchPreview)
 	app.api.Router.HandleFunc("/search", app.search)
@@ -99,6 +105,10 @@ func (api *Api) respondWithJSON(w http.ResponseWriter, code int, payload interfa
 // ------------------------------------------
 // Handler functions
 // ------------------------------------------
+
+func (app *App) ping(w http.ResponseWriter, r *http.Request) {
+	app.api.respondWithJSON(w, 200, Ping{"Success! This is a bing from licensephobia."})
+}
 
 func (app *App) getLicenses(w http.ResponseWriter, r *http.Request) {
 	licenses, err := app.db.GetLicenses()
