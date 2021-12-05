@@ -58,10 +58,10 @@ func (api *Api) Run(port int) {
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{
 			"http://localhost:3000",
-			"https://api.licensephobia.com",
-			"http://api.licensephobia.com",
-			"https://dev.api.licensephobia.com",
-			"http://dev.api.licensephobia.com",
+			"https://licensephobia.com",
+			"http://licensephobia.com",
+			"https://dev.licensephobia.com",
+			"http://dev.licensephobia.com",
 		},
 		AllowCredentials: true,
 	})
