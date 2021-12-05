@@ -19,13 +19,13 @@ type LicenseConditions struct {
 	Modification                  bool   `json:"modification`
 	PatentUse                     bool   `json:"patentUse`
 	PrivateUse                    bool   `json:"privateUse`
-	DisclosureSource              bool   `json:"disclosureSource`
+	DiscloseSource                bool   `json:"discloseSource`
 	LicenseAndCopyrightNotice     bool   `json:"licenseAndCopyrightNotice`
+	LicenseAndCopyrightNoBinaries bool   `json:"licenseAndCopyrightNoBinaries`
 	NetworkUseIsDistribution      bool   `json:"networkUseIsDistribution`
 	SameLicense                   bool   `json:"sameLicense`
 	StateChanges                  bool   `json:"stateChanges`
 	Liability                     bool   `json:"liability`
 	TrademarkUse                  bool   `json:"trademarkUse`
 	Warranty                      bool   `json:"warranty`
-	LicenseAndCopyrightNoBinaries bool   `json:"licenseAndCopyrightNoBinaries`
 }

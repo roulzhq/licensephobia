@@ -45,7 +45,6 @@ func HandleScanRequest(scanRequest ScanRequest, conn *websocket.Conn) error {
 	var wg sync.WaitGroup
 	var packageList map[string]string
 
-	defer wg.Done()
 	defer conn.Close()
 
 	packageManager := scanRequest.PackageManager
@@ -69,9 +68,10 @@ func HandleScanRequest(scanRequest ScanRequest, conn *websocket.Conn) error {
 		break
 	}
 
+	numberOfPackages := len(packageList)
+
 	// Keep track of the packages loaded to later make the summary
-	packages := make(map[string]*Package, len(packageList))
-	var packagesMutex = sync.RWMutex{}
+	ch := make(chan Package, numberOfPackages)
 
 	// We use a counter here to keep track of the current index.
 	// It is then used to assign a loaded package to the packages slice from above
@@ -79,7 +79,7 @@ func HandleScanRequest(scanRequest ScanRequest, conn *websocket.Conn) error {
 		wg.Add(1)
 
 		// load every package, put it into the package list and send the response via websocket
-		go func(name string, version string, packageManager PackageManger, conn *websocket.Conn, wg *sync.WaitGroup, packages map[string]*Package) {
+		go func(name string, version string, packageManager PackageManger, conn *websocket.Conn, wg *sync.WaitGroup) {
 			defer wg.Done()
 
 			pkg, err := loadPackage(packageManager, name)
@@ -91,16 +91,22 @@ func HandleScanRequest(scanRequest ScanRequest, conn *websocket.Conn) error {
 			} else {
 				response = constructScanPackageResponse(pkg, name, version, true)
 
-				packagesMutex.RLock()
-				packages[name] = &pkg
-				packagesMutex.RUnlock()
+				ch <- pkg
 			}
 
 			sendScanPackageResponse(response, conn)
-		}(name, version, packageManager, conn, &wg, packages)
+		}(name, version, packageManager, conn, &wg)
 	}
 
 	wg.Wait()
+
+	close(ch)
+
+	var packages []Package
+
+	for pkg := range ch {
+		packages = append(packages, pkg)
+	}
 
 	// When all packages are loaded, construct the summary
 	summary := constructSummary(packages)
@@ -149,19 +155,92 @@ func sendScanSummaryResponse(response SummaryScanMessage, conn *websocket.Conn) 
 	conn.WriteJSON(response)
 }
 
-func constructSummary(packages map[string]*Package) SummaryScanMessage {
+// constructSummary uses the conditions database to generate a SummaryScanMessage for the given packages.
+func constructSummary(packages []Package) SummaryScanMessage {
+	var licenseIds []string
+
+	for _, pkg := range packages {
+		licenseIds = append(licenseIds, pkg.License.License)
+	}
+
+	details, err := DB.GetLicenseConditionsByIds(licenseIds)
+
+	if err != nil {
+		log.Fatal("Failed to query data for summary.")
+	}
+
+	conditions := ConditionsToArray(details)
+
+	// Now the actual "business logic": For every row that has no "false" in it, add the condition/permission/limitation to the list.
+	// We do this in a manual way to make it easy to add more complex logic in the future.
+
+	var summary SummaryConditions
+
+	// Permissions
+	if !boolArrayContains(conditions["CommercialUse"], false) {
+		summary.Permissions = append(summary.Permissions, "Commercial use")
+	}
+	if !boolArrayContains(conditions["Distribution"], false) {
+		summary.Permissions = append(summary.Conditions, "Distribution")
+	}
+	if !boolArrayContains(conditions["Modification"], false) {
+		summary.Permissions = append(summary.Permissions, "Modification")
+	}
+	if !boolArrayContains(conditions["PatentUse"], false) {
+		summary.Permissions = append(summary.Conditions, "Patent use")
+	}
+	if !boolArrayContains(conditions["PrivateUse"], false) {
+		summary.Permissions = append(summary.Permissions, "Private use")
+	}
+
+	// Conditions
+	if boolArrayContains(conditions["DiscloseSource"], true) {
+		summary.Conditions = append(summary.Conditions, "Disclose source")
+	}
+	if boolArrayContains(conditions["LicenseAndCopyrightNotice"], true) {
+		summary.Conditions = append(summary.Conditions, "License and copyright notice")
+	}
+	if boolArrayContains(conditions["LicenseAndCopyrightNoBinaries"], true) {
+		summary.Conditions = append(summary.Conditions, "License and copyright notice for binaries")
+	}
+	if boolArrayContains(conditions["NetworkUseIsDistribution"], true) {
+		summary.Conditions = append(summary.Conditions, "Network use is distribution")
+	}
+	if boolArrayContains(conditions["SameLicense"], true) {
+		summary.Conditions = append(summary.Conditions, "Same license")
+	}
+	if boolArrayContains(conditions["StateChanges"], true) {
+		summary.Conditions = append(summary.Conditions, "State changes")
+	}
+
+	// Limitations
+	if boolArrayContains(conditions["Liability"], true) {
+		summary.Conditions = append(summary.Conditions, "Limited Liability")
+	}
+	if boolArrayContains(conditions["TrademarkUse"], true) {
+		summary.Conditions = append(summary.Conditions, "No trademark use")
+	}
+	if boolArrayContains(conditions["Warranty"], true) {
+		summary.Conditions = append(summary.Conditions, "No warranty")
+	}
+
 	response := SummaryScanMessage{
 		Type: SummaryMessage,
 		Data: Summary{
-			Conditions: SummaryConditions{
-				Permissions: []string{"Commercial Use", "Distribution", "Modification", "Patent use", "Private use"},
-				Conditions:  []string{"Disclose source", "License notice", "Copyright notice", "Network use is distribution", "Same license", "State changes"},
-				Limitations: []string{"Liability", "Warranty"},
-			},
+			Conditions: summary,
 		},
 	}
 
 	return response
+}
+
+func boolArrayContains(s []bool, e bool) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
 
 func loadPackage(packageManager PackageManger, name string) (Package, error) {
