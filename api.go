@@ -37,6 +37,23 @@ type SearchRequest struct {
 	Name           string        `json:"name"`
 }
 
+var allowedOrigins []string = []string{
+	"http://localhost:3000",
+	"https://licensephobia.com",
+	"wss://licensephobia.com",
+	"https://dev.licensephobia.com",
+	"wss://dev.licensephobia.com",
+}
+
+func isValidOrigin(origin string) bool {
+	for _, b := range allowedOrigins {
+		if b == origin {
+			return true
+		}
+	}
+	return false
+}
+
 // Initialize creates the API router and route endpoints
 func (api *Api) Init() {
 	api.Router = mux.NewRouter()
@@ -45,7 +62,7 @@ func (api *Api) Init() {
 		WriteBufferSize: 1024,
 		CheckOrigin: func(r *http.Request) bool {
 			origin := r.Header.Get("Origin")
-			return origin == "http://localhost:3000"
+			return isValidOrigin(origin)
 		},
 	}
 
@@ -56,13 +73,7 @@ func (api *Api) Init() {
 // Run serves the API via a webserver
 func (api *Api) Run(port int) {
 	c := cors.New(cors.Options{
-		AllowedOrigins: []string{
-			"http://localhost:3000",
-			"https://licensephobia.com",
-			"wss://licensephobia.com",
-			"https://dev.licensephobia.com",
-			"wss://dev.licensephobia.com",
-		},
+		AllowedOrigins:   allowedOrigins,
 		AllowCredentials: true,
 	})
 
