@@ -18,6 +18,10 @@ type Api struct {
 	Upgrader websocket.Upgrader
 }
 
+type Ping struct {
+	Ping string `json:"ping"`
+}
+
 type ScanRequest struct {
 	PackageManager PackageManger `json:"packageManager"`
 	Data           string        `json:"data"`
@@ -52,7 +56,13 @@ func (api *Api) Init() {
 // Run serves the API via a webserver
 func (api *Api) Run(port int) {
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedOrigins: []string{
+			"http://localhost:3000",
+			"https://licensephobia.com",
+			"http://licensephobia.com",
+			"https://dev.licensephobia.com",
+			"http://dev.licensephobia.com",
+		},
 		AllowCredentials: true,
 	})
 
