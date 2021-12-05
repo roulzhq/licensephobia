@@ -59,9 +59,9 @@ func (api *Api) Run(port int) {
 		AllowedOrigins: []string{
 			"http://localhost:3000",
 			"https://licensephobia.com",
-			"http://licensephobia.com",
+			"wss://licensephobia.com",
 			"https://dev.licensephobia.com",
-			"http://dev.licensephobia.com",
+			"wss://dev.licensephobia.com",
 		},
 		AllowCredentials: true,
 	})
