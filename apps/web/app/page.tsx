@@ -1,10 +1,16 @@
-import { Button, Header } from "ui";
+import { calData, spdxData } from "licenses";
 
 export default function Page(): JSX.Element {
   return (
-    <>
-      <Header text="Web" />
-      <Button />
-    </>
+    <div className="page">
+      {spdxData.map((i) => (
+        <pre key={i.licenseId}>
+          {i.name} - {i.licenseId}
+          <p>
+            {calData.find((j) => j["spdx-id"] === i.licenseId)?.description}
+          </p>
+        </pre>
+      ))}
+    </div>
   );
 }
