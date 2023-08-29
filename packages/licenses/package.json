@@ -1,7 +1,7 @@
 {
   "name": "licenses",
   "version": "1.0.0",
-  "description": "",
+  "description": "This package fetches SPDX and Choosealicense.com data from Github, stores them as JSON and exposes them through typescript.",
   "main": "./build/index.js",
   "types": "./build/index.d.js",
   "exports": {
@@ -23,12 +23,12 @@
   },
   "devDependencies": {
     "@rollup/plugin-json": "^6.0.0",
-    "@rollup/plugin-typescript": "^11.1.3",
     "@types/node": "^18.17.1",
     "eslint-config-custom": "workspace:*",
     "rollup": "^3.28.1",
     "rollup-plugin-ts": "^3.4.4",
     "tsconfig": "workspace:*",
+    "types": "workspace:*",
     "tsx": "^3.12.7",
     "yaml": "^2.3.2"
   }
