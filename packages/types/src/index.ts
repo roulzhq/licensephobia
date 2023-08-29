@@ -1,1 +1,2 @@
-export * from "./licenses"
+export * from "./license"
+export * from "./package"

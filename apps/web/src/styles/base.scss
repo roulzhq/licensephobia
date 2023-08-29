@@ -1,0 +1,21 @@
+@use "./colors.scss";
+
+@import "./variables.scss";
+@import url(sanitize.css);
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "IBM Plex Mono", "Roboto Mono", "Roboto", "Ubuntu", sans-serif;
+  font-weight: 500;
+  color: colors.$primary-font;
+  height: 100vh;
+}
+
+main {
+  height: 100vh;
+}

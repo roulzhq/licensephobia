@@ -1,0 +1,35 @@
+@use "$styles/colors";
+
+.backgroundGradient {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 60%;
+  height: 100%;
+  z-index: -1;
+  clip-path: polygon(40% 0, 100% 0, 100% 100%, 0% 100%);
+  background: linear-gradient(#00ff557e 0%, #00ffc2 100%);
+}
+
+.page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-flow: column;
+  height: 100vh;
+}
+
+.title {
+  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.titleChip {
+  background-color: colors.$grey-1;
+  padding: 6px 24px;
+  border-radius: 25px;
+  font-size: 1rem;
+  box-shadow: 3px 2px 6px 2px #00000040;
+}

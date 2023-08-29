@@ -1,0 +1,6 @@
+{
+  "extends": ["custom/next"],
+  "rules": {
+    "react/jsx-sort-props": [false]
+  }
+}
