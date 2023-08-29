@@ -1,0 +1,50 @@
+@use "$styles/colors";
+
+.page {
+  padding: 32px 32px 0;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-flow: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+
+  h1 {
+    margin: 0;
+  }
+
+  div > label {
+    margin-left: 16px;
+  }
+}
+
+.licenseList {
+  overflow: auto;
+  padding-bottom: 32px;
+
+  ul {
+    display: flex;
+    flex-flow: column;
+    gap: 16px;
+  }
+
+  ul,
+  li {
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+  }
+
+  li {
+    background-color: colors.$grey-2;
+    box-shadow: 3px 2px 6px 2px #00000015;
+    border-radius: 3px;
+
+    a {
+      margin: 0;
+    }
+  }
+}

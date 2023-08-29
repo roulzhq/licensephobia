@@ -19,9 +19,6 @@ importers:
 
   apps/web:
     dependencies:
-      '@fontsource-variable/roboto-mono':
-        specifier: ^5.0.9
-        version: 5.0.9
       '@fontsource/ibm-plex-mono':
         specifier: ^5.0.8
         version: 5.0.8
@@ -638,10 +635,6 @@ packages:
     resolution: {integrity: sha512-P6omY1zv5MItm93kLM8s2vr1HICJH8v0dvddDhysbIuZ+vcjOHg5Zbkf1mTkcmi2JA9oBG2anOkRnW8WJTS8Og==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: true
-
-  /@fontsource-variable/roboto-mono@5.0.9:
-    resolution: {integrity: sha512-iNZz251NVB1sENvrTRt7x5t1yuaYai/QsBRwYtEiot+R33Ks8CQnDZxY2kbrFdEFwTJVqb7RyObjgGVuysTRUw==}
-    dev: false
 
   /@fontsource/ibm-plex-mono@5.0.8:
     resolution: {integrity: sha512-AoR7K2YtlGKy3LApyLYjqjyz0o8XtkRvbB/juMsGSGNayBBAly140ykZls+VxcXjZSLQpp2RyxKo6lYOuHPmUw==}

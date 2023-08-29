@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "This package fetches SPDX and Choosealicense.com data from Github, stores them as JSON and exposes them through typescript.",
   "main": "./build/index.js",
-  "types": "./build/index.d.js",
+  "types": "./build/index.d.ts",
   "exports": {
     ".": "./build/index.js"
   },

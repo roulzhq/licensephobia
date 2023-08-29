@@ -44,3 +44,9 @@ export function getLicenseDefinitionById(
 
   return license;
 }
+
+export function getAllLicenses(): LicenseDefinition[] {
+  return spdxData
+    .map((i) => getLicenseDefinitionById(i.licenseId))
+    .filter((i) => i !== undefined) as LicenseDefinition[];
+}

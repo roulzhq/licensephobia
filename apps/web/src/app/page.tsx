@@ -19,7 +19,6 @@ export default function Page(): JSX.Element {
           hints={[]}
         />
       </div>
-      <div className={styles.backgroundGradient} />
     </div>
   );
 }

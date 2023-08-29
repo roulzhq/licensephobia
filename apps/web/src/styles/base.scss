@@ -1,4 +1,5 @@
-@use "./colors.scss";
+@use "./colors";
+@use "./mixins";
 
 @import "./variables.scss";
 @import url(sanitize.css);
@@ -14,8 +15,33 @@ body {
   font-weight: 500;
   color: colors.$primary-font;
   height: 100vh;
+  background-color: colors.$grey-2;
 }
 
-main {
-  height: 100vh;
+button {
+  background-color: colors.$grey-2;
+  cursor: pointer;
+  border: none;
+
+  @include mixins.transition-smooth();
+
+  &:hover {
+    background: #e7e7e7;
+  }
+}
+
+a {
+  text-decoration: none;
+  color: #1ac79f;
+
+  @include mixins.transition-smooth();
+
+  &:hover {
+    color: #11e2b1;
+    text-decoration: underline;
+  }
+}
+
+a[rel~="external"]:after {
+  content: " \1F855";
 }

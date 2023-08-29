@@ -3,6 +3,8 @@ import "$styles/base.scss";
 
 import Header from "$components/header";
 
+import styles from "./layout.module.scss";
+
 export default function RootLayout({
   children,
 }: {
@@ -12,7 +14,8 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Header />
-        <main>{children}</main>
+        <main className={styles.content}>{children}</main>
+        <div className={styles.backgroundGradient} />
       </body>
     </html>
   );
