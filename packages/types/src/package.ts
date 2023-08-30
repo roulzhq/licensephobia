@@ -1,4 +1,4 @@
-export type PackageManagerId = "npm"
+export type PackageManagerId = "npm";
 
 export interface DependencyFileScanResult {
   packageManager: PackageManagerId;
@@ -7,7 +7,8 @@ export interface DependencyFileScanResult {
 
 export interface PackageScanResult {
   name: string;
+  source: string;
   version: string;
-  licenseId: string;
-  websiteUrl: string;
+  licenseId: string | null;
+  websiteUrl: string | null;
 }
