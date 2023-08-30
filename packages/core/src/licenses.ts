@@ -1,5 +1,5 @@
-import { LicenseDefinition } from "types";
-import { spdxData, calData } from "licenses";
+import { LicenseDefinition } from "@licensephobia/types";
+import { spdxData, calData } from "@licensephobia/licenses";
 
 export function getLicenseDefinitionById(
   licenseId: string

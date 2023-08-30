@@ -2,7 +2,7 @@ import {
   DependencyFileScanResult,
   PackageJsonInput,
   PackageScanResult,
-} from "types";
+} from "@licensephobia/types";
 
 const SUPPORTED_PACKAGE_JSON_DEPENDENCY_FIELDS = [
   "dependencies",

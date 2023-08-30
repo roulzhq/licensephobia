@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { getAllLicenses } from "core";
+import { getAllLicenses } from "@licensephobia/core";
 
 import styles from "./page.module.scss";
 

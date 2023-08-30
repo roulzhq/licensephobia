@@ -1,6 +1,6 @@
 "use client";
 
-import { scanPackageJson } from "core";
+import { scanPackageJson } from "@licensephobia/core";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.scss";
 import Dropzone from "$components/dropzone";

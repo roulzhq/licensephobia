@@ -2,7 +2,7 @@ import {
   LicenseRulePermission,
   LicenseRuleCondition,
   LicenseRuleLimitation,
-} from "types";
+} from "@licensephobia/types";
 
 // SPDX Repository types
 

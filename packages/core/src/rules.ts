@@ -2,7 +2,7 @@ import {
   LicenseRuleCondition,
   LicenseRuleLimitation,
   LicenseRulePermission,
-} from "types";
+} from "@licensephobia/types";
 
 export function narrowRules(
   permissions: LicenseRulePermission,
