@@ -2,7 +2,6 @@ import "@fontsource/ibm-plex-mono";
 import "$styles/base.scss";
 
 import Header from "$components/header";
-
 import styles from "./layout.module.scss";
 
 export default function RootLayout({

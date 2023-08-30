@@ -1,8 +1,7 @@
 {
-  "name": "core",
+  "name": "@licensephobia/core",
   "version": "0.1.0",
   "description": "",
-  "type": "module",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "scripts": {
@@ -18,7 +17,6 @@
   "devDependencies": {
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-typescript": "^11.1.3",
-    "eslint-config-custom": "workspace:*",
     "rollup": "^3.28.1",
     "rollup-plugin-ts": "^3.4.4",
     "tsconfig": "workspace:*",

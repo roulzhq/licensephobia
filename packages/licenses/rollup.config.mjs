@@ -7,7 +7,7 @@ const config = {
 	input: './src/index.ts',
 	output: {
     dir: "./build",
-		format: 'esm'
+		format: 'cjs'
 	},
   plugins: [ts({outDir: "./build"}), json()]
 };

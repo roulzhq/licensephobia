@@ -5,8 +5,8 @@ import { getAllLicenses } from "core";
 
 import styles from "./page.module.scss";
 
-const allLicenses = getAllLicenses().sort(
-  (a, b) => a.name?.localeCompare(b.name)
+const allLicenses = getAllLicenses().sort((a, b) =>
+  a.name!.localeCompare(b.name as string)
 );
 
 export default function Page(): JSX.Element {
@@ -55,7 +55,9 @@ export default function Page(): JSX.Element {
               <b>{i.name}</b>
               <div>
                 <p>{i.description ?? "No description known"}</p>
-                <a href={i.spdxReferenceUrl} target="_blank">{i.spdxReferenceUrl}</a>
+                <a href={i.spdxReferenceUrl} target="_blank" rel="noreferrer">
+                  {i.spdxReferenceUrl}
+                </a>
               </div>
             </li>
           ))}

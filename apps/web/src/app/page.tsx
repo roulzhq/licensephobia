@@ -1,20 +1,24 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { scanPackageJson } from "core";
-
+import { useRouter } from "next/navigation";
+import styles from "./page.module.scss";
 import Dropzone from "$components/dropzone";
 import SearchField from "$components/searchField";
-import styles from "./page.module.scss";
 
 export default function Page(): JSX.Element {
   const router = useRouter();
 
   const handleFileSubmit = (file: File) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
     const reader = new FileReader();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     reader.readAsText(file);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     reader.onload = (e) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (e?.target?.result) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const data = e.target.result as string;
 
         try {
@@ -24,8 +28,9 @@ export default function Page(): JSX.Element {
             .map((i) => `${i.name}@${i.version}`)
             .join("&package=")}`;
           router.push(redirectUrl);
-        } catch (e) {
-          console.log(e);
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.log(err);
         }
       }
     };
@@ -40,9 +45,9 @@ export default function Page(): JSX.Element {
       <div>
         <SearchField
           placeholder="search"
-          onBlur={() => {}}
-          onChange={() => {}}
-          onHintClick={() => {}}
+          onBlur={console.log}
+          onChange={console.log}
+          onHintClick={console.log}
           hints={[]}
         />
         <Dropzone

@@ -1,6 +1,19 @@
 {
-  "extends": ["custom/next"],
+  "extends": [
+    "@vercel/style-guide/eslint/node",
+    "@vercel/style-guide/eslint/typescript",
+    "@vercel/style-guide/eslint/browser",
+    "@vercel/style-guide/eslint/react",
+    "@vercel/style-guide/eslint/next",
+    "eslint-config-turbo"
+  ],
+  "globals": {
+    "React": true,
+    "JSX": true
+  },
+  "ignorePatterns": ["node_modules/", "dist/"],
+  // add rules configurations here
   "rules": {
-    "react/jsx-sort-props": [false]
+    "import/no-default-export": "off"
   }
 }

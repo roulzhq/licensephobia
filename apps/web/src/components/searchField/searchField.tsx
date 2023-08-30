@@ -1,7 +1,6 @@
-"use client"
+"use client";
 
-import { ChangeEvent, ChangeEventHandler, MouseEventHandler } from "react";
-
+import type { ChangeEventHandler, MouseEventHandler } from "react";
 import styles from "./searchField.module.scss";
 
 export interface SearchFieldProps {
@@ -12,13 +11,7 @@ export interface SearchFieldProps {
   onHintClick: (e: Event) => void;
 }
 
-export default function SearchField({
-  placeholder,
-  hints,
-  onChange,
-  onBlur,
-  onHintClick,
-}: SearchFieldProps) {
+export default function SearchField({ onChange, onBlur }: SearchFieldProps): JSX.Element {
   return (
     <div className={styles.container}>
       <input type="search" onChange={onChange} />

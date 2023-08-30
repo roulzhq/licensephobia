@@ -1,0 +1,8 @@
+{
+  "root": true,
+  "rules": {
+    "no-console": ["error", { "allow": ["warn", "error"] }],
+    "react/jsx-sort-props": [0],
+    "unicorn/filename-case": [0]
+  }
+}

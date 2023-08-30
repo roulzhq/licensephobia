@@ -1,32 +1,23 @@
 "use client";
 
-import {
-  ChangeEventHandler,
-  MouseEvent,
-  MouseEventHandler,
-  useState,
-} from "react";
-
+import type { ChangeEventHandler, MouseEvent, MouseEventHandler } from "react";
+import { useState } from "react";
 import styles from "./dropzone.module.scss";
 
 export interface DropzoneProps {
   placeholder: string;
   onChange?: ChangeEventHandler<HTMLInputElement>;
-  onSubmit?: (
-    file: File,
-    e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
-  ) => void;
+  onSubmit?: (file: File, e: MouseEvent<HTMLButtonElement>) => void;
 }
 
 export default function Dropzone({
-  placeholder,
   onChange,
   onSubmit,
-}: DropzoneProps) {
+}: DropzoneProps): JSX.Element {
   const [file, setFile] = useState<File | undefined>(undefined);
 
   const handleFileUpload: ChangeEventHandler<HTMLInputElement> = (e) => {
-    if (e?.target?.files && e.target.files.length > 0) {
+    if (e.target.files && e.target.files.length > 0) {
       setFile(e.target.files[0]);
     }
 
