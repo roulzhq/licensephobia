@@ -1,6 +1,6 @@
 "use client";
 
-import { scanPackageJson } from "@licensephobia/core";
+import { scanPackageJson, scanPipfile } from "@licensephobia/core";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.scss";
 import Dropzone from "$components/dropzone";
@@ -20,18 +20,20 @@ export default function Page(): JSX.Element {
       if (e?.target?.result) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const data = e.target.result as string;
+        const result = scanPipfile(data);
+        console.log(result)
 
-        try {
-          const scanResult = scanPackageJson(data);
+        // try {
+        //   const scanResult = scanPackageJson(data);
 
-          const redirectUrl = `/scan?${scanResult.results
-            .map((i) => `${i.name}@${i.version}`)
-            .join("&package=")}`;
-          router.push(redirectUrl);
-        } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log(err);
-        }
+        //   const redirectUrl = `/scan?${scanResult.results
+        //     .map((i) => `${i.name}@${i.version}`)
+        //     .join("&package=")}`;
+        //   router.push(redirectUrl);
+        // } catch (err) {
+        //   // eslint-disable-next-line no-console
+        //   console.log(err);
+        // }
       }
     };
   };
