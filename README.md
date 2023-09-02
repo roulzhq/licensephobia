@@ -1,80 +1,39 @@
-# Turborepo starter
+![Logo-white](https://user-images.githubusercontent.com/11553349/144132818-8bbcd9ba-fa0d-4a99-aa80-9fea8afcefe3.png)
 
-This is an official starter Turborepo.
+[Licensephobia.com](https://licensephobia.com) is a tool that let's you easily search for NPM (and soon pip) packages to view the licenses and get a license summary about your apps.
 
-## Using this example
+It offers a public user interface, a REST API as well as a CLI. All of the libraries/tools are open source and built for the open source community!
 
-Run the following command:
+## How it's done
+- We maintain a Postgres Database (hosted on Supabase) from which we are querying data about what licenses there are, what usage conditions they have and where to find further information about them. The data is continuously fetched from [SPDX data](https://spdx.org/licenses/) as well as a lot of manual screening of licenses.
+- We use the public NPM registry API to search for packages and the license info, but the architecture is set up in a way that let's us add other package managers in the future.
+- Users can view license info on specific packages on our UI, or upload/scan package.json files to get a summary of all the licenses used.
 
-```sh
-npx create-turbo@latest
-```
+As said, we will open-source all the packages/apps we build, at the the stuff we build will make up our service architecture:
+<p align="center">
+<img src="https://user-images.githubusercontent.com/11553349/144129612-38f126d7-8ac8-4be5-81d8-326e89f265c6.png" alt="Service architecture" style="height: 400px;">
+</p>
 
-## What's inside?
+## Long-tearm goals:
+- Support many different package managers. The list, right now, includes:
+  - Pip (requirements.txt, Pipfile, Pyproject.tom etc)
+  - Cargo/Rust
+  - Go
+  - NuGet
+  - ...
+- A robust CLI that integrates with CI/CD tools to continuously scan packages and provides warnings/infrmation
+- The web's biggest list of machine-readable license condition data
 
-This Turborepo includes the following packages/apps:
+## Why not use [choosealicense.com](https://choosealicense.com/)?
+Well, right now you should probably use this if you want to know more about open source licenses! But there are some key differences to licensephobia:
+- It only supports a selected number of licenses
+- You can only get information about licenses, not packages or your package dependency files.
+- It does not offer a CLI (as far as I know?)
 
-### Apps and Packages
-
-- `web`: another [Next.js](https://nextjs.org/) app
-- `ui`: a stub React component library shared by both `web` and `docs` applications
-- `eslint-config-custom`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `tsconfig`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm build
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm dev
-```
-
-### Remote Caching
-
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup), then enter the following commands:
-
-```
-cd my-turborepo
-npx turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-npx turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)
+## FAQ
+- **F: Does Licensephobia provide any legal guarantee about the license summaries?**
+  - **A: No!** While we try our best to provide an accurate and correct representation of the licenses and take care to only show valid information in the summary, there might be mistakes on our side or in the data we use, that lead to inconsistancies. Because of this, we DO NOT provide any legal advice and don't guarantee the correctness of our data. If you find any mistake on our side, please open an issue on Github!
+- **F: Does Licensephobia use the data uploaded via package files in any other way, apart from the license stuff?**
+  - **A: Of course not!** Uploaded files are not saved and only the package names and versions are read by our sourcecode. In fact, you can just browse the sourcecode of this repo to verify this. However, the whole uploaded file will be sent to our server, just to make the parsing of files easier and faster.
+- **F: Is the name `Licensephobia` inspired by some other tool?**
+  - **A: Oh yes,** it's basically a rip-off of the name of the amazing tool [Bundlephobia](https://bundlephobia.com). While we don't have any relation to the Bundlephobia maintainers, we recommend to check them out!
