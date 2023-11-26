@@ -6,9 +6,15 @@ export interface DependencyFileScanResult {
 }
 
 export interface PackageScanResult {
-  name: string;
+  id: string;
   source: string;
   version: string;
-  licenseId: string | null;
-  websiteUrl: string | null;
+}
+
+export interface PackageCheckResult {
+  id: string;
+  description: string;
+  name: string;
+  licenseId: string;
+  homepage: string;
 }

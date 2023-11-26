@@ -1,40 +1,32 @@
 "use client";
 
-import { scanPackageJson } from "@licensephobia/core";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import styles from "./page.module.scss";
+
+import { PackageManagerId } from "@licensephobia/types";
+
 import Dropzone from "$components/dropzone";
-import SearchField from "$components/searchField";
+import { fileToBase64 } from "$utils";
+
+import styles from "./page.module.scss";
 
 export default function Page(): JSX.Element {
   const router = useRouter();
+  const [packageManager] = useState<PackageManagerId>("npm");
 
-  const handleFileSubmit = (file: File) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-    const reader = new FileReader();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-    reader.readAsText(file);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-    reader.onload = (e) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      if (e?.target?.result) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const data = e.target.result as string;
-
-        try {
-          const scanResult = scanPackageJson(data);
-
-          const redirectUrl = `/scan?${scanResult.results
-            .map((i) => `${i.name}@${i.version}`)
-            .join("&package=")}`;
-          router.push(redirectUrl);
-        } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log(err);
-        }
-      }
-    };
-  };
+  async function handleFileSubmit(file: File) {
+    try {
+      const fileBase64 = (await fileToBase64(file)).slice(
+        "data:application/json;base64,".length
+      );
+      const redirectUrl = `/scan?pm=${packageManager}&file=${encodeURIComponent(
+        fileBase64
+      )}`;
+      router.push(redirectUrl);
+    } catch (e) {
+      console.log("error parsing file", e);
+    }
+  }
 
   return (
     <div className={styles.page}>
@@ -43,13 +35,6 @@ export default function Page(): JSX.Element {
         <span className={styles.titleChip}>Node.js</span> Licenses anymore!
       </h1>
       <div>
-        <SearchField
-          placeholder="search"
-          onBlur={console.log}
-          onChange={console.log}
-          onHintClick={console.log}
-          hints={[]}
-        />
         <Dropzone
           placeholder="upload"
           onChange={console.log}

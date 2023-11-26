@@ -1,6 +1,6 @@
 import {
   DependencyFileScanResult,
-  PackageJsonInput,
+  PackageJson,
   PackageScanResult,
 } from "@licensephobia/types";
 
@@ -12,7 +12,7 @@ const SUPPORTED_PACKAGE_JSON_DEPENDENCY_FIELDS = [
 
 export function isPackageJson(
   jsonObj: Record<string, unknown>
-): jsonObj is PackageJsonInput {
+): jsonObj is PackageJson {
   const includesAndIsObject = (key: string) => {
     if (key in jsonObj) {
       return typeof jsonObj[key] === "object";
@@ -35,15 +35,13 @@ export function scanPackageJson(jsonString: string): DependencyFileScanResult {
     SUPPORTED_PACKAGE_JSON_DEPENDENCY_FIELDS.flatMap((objName) => {
       if (!(objName in packageJson)) return [];
 
-      return Object.entries(packageJson[objName]).map(([name, version]) => {
+      return Object.entries(packageJson[objName]).map(([id, version]) => {
         if(typeof version !== "string") throw new Error("Unexpected error parsing package.lock")
 
         return {
-          name,
+          id,
           source: objName,
           version,
-          licenseId: null,
-          websiteUrl: null,
         };
       });
     });

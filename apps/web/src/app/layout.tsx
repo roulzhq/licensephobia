@@ -1,8 +1,11 @@
 import "@fontsource/ibm-plex-mono";
-import "$styles/base.scss";
 
 import Header from "$components/header";
+
 import styles from "./layout.module.scss";
+import Providers from "./providers";
+
+import "$styles/base.scss";
 
 export default function RootLayout({
   children,
@@ -12,9 +15,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Header />
-        <main className={styles.content}>{children}</main>
-        <div className={styles.backgroundGradient} />
+        <Providers>
+          <Header />
+          <main className={styles.content}>{children}</main>
+          <div className={styles.backgroundGradient} />
+        </Providers>
       </body>
     </html>
   );
