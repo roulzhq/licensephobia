@@ -286,7 +286,7 @@
   {
     "title": "Creative Commons Attribution Share Alike 4.0 International",
     "spdx-id": "CC-BY-SA-4.0",
-    "description": "Similar to <a href='/licenses/cc-by-4.0/'>CC-BY-4.0</a> but requires derivatives be distributed under the same or a similar, <a href=\"https://creativecommons.org/compatiblelicenses/\">compatible</a> license. Frequently used for media assets and educational materials. A previous version is the default license for Wikipedia and other Wikimedia projects. Not recommended for software.",
+    "description": "Similar to <a href='/licenses/cc-by-4.0/'>CC-BY-4.0</a> but requires derivatives be distributed under the same or a similar, <a href=\"https://creativecommons.org/compatiblelicenses\">compatible</a> license. Frequently used for media assets and educational materials. A previous version is the default license for Wikipedia and other Wikimedia projects. Not recommended for software.",
     "how": "Create a text file (typically named LICENSE or LICENSE.txt) in the root of your source code and copy the text of the license into the file. It is also acceptable to solely supply a link to a copy of the license, usually to the <a href='https://creativecommons.org/licenses/by-sa/4.0/'>canonical URL for the license</a>.",
     "using": {
       "Flight rules for Git": "https://github.com/k88hudson/git-flight-rules/blob/master/LICENSE",
@@ -488,7 +488,7 @@
     "description": "This commercially-friendly copyleft license provides the ability to commercially license binaries; a modern royalty-free patent license grant; and the ability for linked works to use other licenses, including commercial ones.",
     "how": "Create a text file (typically named LICENSE or LICENSE.txt) in the root of your source code and copy the text of the license into the file.",
     "using": {
-      "Eclipse hawkBit": "https://github.com/eclipse/hawkbit/blob/master/LICENSE",
+      "ClojureScript": "https://github.com/clojure/clojurescript/blob/master/LICENSE",
       "JUnit": "https://github.com/junit-team/junit4/blob/main/LICENSE-junit.txt",
       "Quil": "https://github.com/quil/quil/blob/master/LICENSE"
     },
@@ -517,9 +517,9 @@
     "description": "This commercially-friendly copyleft license provides the ability to commercially license binaries; a modern royalty-free patent license grant; and the ability for linked works to use other licenses, including commercial ones.",
     "how": "Create a text file (typically named LICENSE or LICENSE.txt) in the root of your source code and copy the text of the license into the file.",
     "using": {
-      "Eclipse SmartHome": "https://github.com/eclipse/smarthome/blob/master/LICENSE",
-      "openHAB": "https://github.com/openhab/openhab-distro/blob/master/LICENSE",
-      "SUMO": "https://github.com/eclipse/sumo/blob/master/LICENSE"
+      "hawkBit": "https://github.com/eclipse/hawkbit/blob/master/LICENSE",
+      "openHAB": "https://github.com/openhab/openhab-distro/blob/main/LICENSE",
+      "SUMO": "https://github.com/eclipse-sumo/sumo/blob/main/LICENSE"
     },
     "permissions": [
       "commercial-use",
@@ -1106,8 +1106,8 @@
     "how": "Insert the license or a link to it along with a copyright notice into your source file(s), and/or create a text file (typically named LICENSE or LICENSE.txt) in the root of your source code and copy the text of the license into the file, replacing [year] with the current year and [fullname] with the name (or names) of the copyright holders.",
     "note": "It is recommended to add a link to the license and copyright notice at the top of each source file, example text can be found at https://oss.oracle.com/licenses/upl/.",
     "using": {
+      "graaljs": "https://github.com/oracle/graaljs/blob/master/LICENSE",
       "Roc": "https://github.com/roc-lang/roc/blob/main/LICENSE",
-      "Skater": "https://github.com/oracle/skater/blob/main/LICENSE.txt",
       "Soufflé": "https://github.com/souffle-lang/souffle/blob/master/LICENSE"
     },
     "permissions": [
