@@ -19,13 +19,13 @@
     "typescript": "^5.2.2"
   },
   "devDependencies": {
-    "@rollup/plugin-json": "^6.0.0",
-    "@types/node": "^18.17.1",
-    "rollup": "^3.28.1",
-    "rollup-plugin-ts": "^3.4.4",
-    "tsconfig": "workspace:*",
     "@licensephobia/types": "workspace:*",
-    "tsx": "^3.12.7",
-    "yaml": "^2.3.2"
+    "@rollup/plugin-json": "^6.0.1",
+    "@types/node": "^18.18.13",
+    "rollup": "^3.29.4",
+    "rollup-plugin-ts": "^3.4.5",
+    "tsconfig": "workspace:*",
+    "tsx": "^3.14.0",
+    "yaml": "^2.3.4"
   }
 }
